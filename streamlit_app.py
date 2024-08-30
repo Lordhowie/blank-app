@@ -2,8 +2,42 @@ import streamlit as st
 import json
 
 def generate_code(app_config):
-    # (The generate_code function remains the same as in the previous version)
-    # ... (code omitted for brevity)
+    code = f"""
+import streamlit as st
+import pandas as pd
+import plotly.express as px
+
+st.set_page_config(layout='{app_config['layout']}')
+
+# Data loading
+data = pd.read_csv('{app_config['data_source']}')  # Replace with appropriate data loading method
+
+"""
+    for component in app_config['components']:
+        if component['type'] == 'Chart':
+            code += f"""
+# {component['type']} component
+chart_type = '{component['chart_type']}'
+if chart_type == 'bar':
+    fig = px.bar(data, x='{component['x_axis']}', y='{component['y_axis']}')
+elif chart_type == 'line':
+    fig = px.line(data, x='{component['x_axis']}', y='{component['y_axis']}')
+elif chart_type == 'scatter':
+    fig = px.scatter(data, x='{component['x_axis']}', y='{component['y_axis']}')
+st.plotly_chart(fig)
+"""
+        elif component['type'] == 'Table':
+            code += f"""
+# {component['type']} component
+st.dataframe(data.head({component['num_rows']}))
+"""
+        elif component['type'] == 'Text':
+            code += f"""
+# {component['type']} component
+st.write('''{component['content']}''')
+"""
+    return code
+
 
 def main():
     st.title("Streamlit App Builder (Drag-and-Drop)")
